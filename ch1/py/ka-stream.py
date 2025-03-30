@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 
 #model = ChatOpenAI(model="gpt-3.5-turbo")
-model = ChatOllama(model="gemma:latest")
+model = ChatOllama(model="gemma3:4b")
 
 
 template = ChatPromptTemplate.from_messages(

@@ -16,7 +16,7 @@ template = ChatPromptTemplate.from_messages(
 )
 
 #model = ChatOpenAI()
-model = ChatOllama(model="gemma:latest")
+model = ChatOllama(model="gemma3:4b")
 
 # `prompt` and `completion` are the results of using template and model once
 

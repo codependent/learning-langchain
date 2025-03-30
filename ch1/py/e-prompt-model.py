@@ -13,7 +13,7 @@ Question: {question}
 Answer: """)
 
 #model = ChatOpenAI(model="gpt-3.5-turbo")
-model = ChatOllama(model="gemma:latest")
+model = ChatOllama(model="gemma3:4b")
 
 # `prompt` and `completion` are the results of using template and model once
 

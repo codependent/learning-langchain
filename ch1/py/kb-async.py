@@ -11,7 +11,7 @@ template = ChatPromptTemplate.from_messages(
 )
 
 #model = ChatOpenAI(model="gpt-3.5-turbo")
-model = ChatOllama(model="gemma:latest")
+model = ChatOllama(model="gemma3:4b")
 
 
 @chain

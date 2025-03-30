@@ -12,7 +12,7 @@ template = ChatPromptTemplate.from_messages(
 )
 
 #model = ChatOpenAI()
-model = ChatOllama(model="gemma:latest")
+model = ChatOllama(model="gemma3:4b")
 
 # combine them with the | operator
 
