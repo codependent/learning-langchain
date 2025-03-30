@@ -1,3 +1,4 @@
+from langchain_ollama import ChatOllama
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -10,7 +11,8 @@ template = ChatPromptTemplate.from_messages(
     ]
 )
 
-model = ChatOpenAI()
+#model = ChatOpenAI()
+model = ChatOllama(model="gemma:latest")
 
 # combine them with the | operator
 

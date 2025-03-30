@@ -1,9 +1,11 @@
 from langchain_core.runnables import chain
+from langchain_ollama import ChatOllama
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 
-model = ChatOpenAI(model="gpt-3.5-turbo")
+#model = ChatOpenAI(model="gpt-3.5-turbo")
+model = ChatOllama(model="gemma:latest")
 
 
 template = ChatPromptTemplate.from_messages(

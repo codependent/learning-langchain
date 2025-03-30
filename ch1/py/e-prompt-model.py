@@ -1,3 +1,4 @@
+from langchain_ollama import ChatOllama
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 
@@ -11,7 +12,8 @@ Question: {question}
 
 Answer: """)
 
-model = ChatOpenAI(model="gpt-3.5-turbo")
+#model = ChatOpenAI(model="gpt-3.5-turbo")
+model = ChatOllama(model="gemma:latest")
 
 # `prompt` and `completion` are the results of using template and model once
 
