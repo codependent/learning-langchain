@@ -2,7 +2,7 @@
 1. Ensure docker is installed and running (https://docs.docker.com/get-docker/)
 2. pip install -qU langchain_postgres
 3. Run the following command to start the postgres container:
-   
+
 docker run \
     --name pgvector-container \
     -e POSTGRES_USER=langchain \
@@ -15,6 +15,7 @@ docker run \
 """
 
 from langchain_community.document_loaders import TextLoader
+from langchain_ollama import OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_postgres.vectorstores import PGVector
@@ -32,13 +33,15 @@ text_splitter = RecursiveCharacterTextSplitter(
 documents = text_splitter.split_documents(raw_documents)
 
 # Create embeddings for the documents
-embeddings_model = OpenAIEmbeddings()
+#embeddings_model = OpenAIEmbeddings()
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = PGVector.from_documents(
     documents, embeddings_model, connection=connection)
 
-results = db.similarity_search("query", k=4)
+results = db.similarity_search_with_score("Who did Pythagoras borrow his philosophy from?", k=4)
 
+print("Results of similarity search:")
 print(results)
 
 print("Adding documents to the vector store")

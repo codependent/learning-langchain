@@ -1,11 +1,13 @@
 from langchain.indexes import SQLRecordManager, index
+from langchain_ollama import OllamaEmbeddings
 from langchain_postgres.vectorstores import PGVector
 from langchain_openai import OpenAIEmbeddings
 from langchain.docstore.document import Document
 
 connection = "postgresql+psycopg://langchain:langchain@localhost:6024/langchain"
 collection_name = "my_docs"
-embeddings_model = OpenAIEmbeddings(model="text-embedding-3-small")
+#embeddings_model = OpenAIEmbeddings(model="text-embedding-3-small")
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 namespace = "my_docs_namespace"
 
 vectorstore = PGVector(

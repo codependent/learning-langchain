@@ -1,3 +1,4 @@
+from langchain_ollama import OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from sentence_transformers import SentenceTransformer
 
@@ -15,7 +16,8 @@ embeddings = model.encode(texts)
 
 print(embeddings)
 
-model = OpenAIEmbeddings(model="text-embedding-3-small")
+#model = OpenAIEmbeddings(model="text-embedding-3-small")
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 embeddings = model.embed_documents([
     "Hi there!",
     "Oh, hello!",
