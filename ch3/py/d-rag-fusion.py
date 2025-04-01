@@ -1,4 +1,5 @@
 from langchain_community.document_loaders import TextLoader
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_postgres.vectorstores import PGVector
@@ -16,7 +17,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 documents = text_splitter.split_documents(raw_documents)
 
 # Create embeddings for the documents
-embeddings_model = OpenAIEmbeddings()
+#embeddings_model = OpenAIEmbeddings()
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = PGVector.from_documents(
     documents, embeddings_model, connection=connection)
@@ -25,14 +27,15 @@ db = PGVector.from_documents(
 retriever = db.as_retriever(search_kwargs={"k": 5})
 
 prompt_rag_fusion = ChatPromptTemplate.from_template(
-    """You are a helpful assistant that generates multiple search queries based on a single input query. \n Generate multiple search queries related to: {question} \n Output (4 queries):""")
+    """You are a helpful assistant that generates multiple search queries based on a single input query. \n Generate multiple search queries related to: {question} \n Output (4 queries). Don't use any introductory text. Also don't use numbering or bullet points.""")
 
 
 def parse_queries_output(message):
     return message.content.split('\n')
 
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+#llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatOllama(model="gemma3:4b", temperature=0)
 query_gen = prompt_rag_fusion | llm | parse_queries_output
 
 query = "Who are the key figures in the ancient greek history of philosophy?"

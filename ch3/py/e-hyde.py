@@ -1,4 +1,5 @@
 from langchain_community.document_loaders import TextLoader
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_postgres.vectorstores import PGVector
@@ -17,7 +18,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 documents = text_splitter.split_documents(raw_documents)
 
 # Create embeddings for the documents
-embeddings_model = OpenAIEmbeddings()
+#embeddings_model = OpenAIEmbeddings()
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = PGVector.from_documents(
     documents, embeddings_model, connection=connection)
@@ -28,7 +30,7 @@ retriever = db.as_retriever(search_kwargs={"k": 5})
 prompt_hyde = ChatPromptTemplate.from_template(
     """Please write a passage to answer the question.\n Question: {question} \n Passage:""")
 
-generate_doc = (prompt_hyde | ChatOpenAI(temperature=0) | StrOutputParser())
+generate_doc = (prompt_hyde | ChatOllama(model="gemma3:4b", temperature=0) | StrOutputParser())
 
 """
 Next, we take the hypothetical document generated above and use it as input to the retriever, 
@@ -42,7 +44,8 @@ prompt = ChatPromptTemplate.from_template(
     """Answer the question based only on the following context: {context} Question: {question} """
 )
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+#llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatOllama(model="gemma3:4b", temperature=0)
 
 
 @chain
