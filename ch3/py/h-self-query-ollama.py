@@ -1,13 +1,9 @@
-from langchain.chains.conversation.prompt import DEFAULT_TEMPLATE
 from langchain.chains.query_constructor.base import AttributeInfo
 from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain_ollama import OllamaEmbeddings, ChatOllama
-from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_postgres.vectorstores import PGVector
 from langchain_core.documents import Document
 from langchain.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 
 # PGVector DB connection
 connection = "postgresql+psycopg://langchain:langchain@localhost:6024/langchain"
@@ -54,10 +50,24 @@ vectorstore = PGVector.from_documents(docs, embeddings_model, connection=connect
 
 # Metadata schema
 metadata_field_info = [
-    AttributeInfo(name="genre", description="The genre of the movie", type="string or list[string]"),
-    AttributeInfo(name="year", description="The year the movie was released", type="integer"),
-    AttributeInfo(name="director", description="The name of the movie director", type="string"),
-    AttributeInfo(name="rating", description="A 1-10 rating for the movie", type="float"),
+    AttributeInfo(
+        name="genre",
+        description="The genre of the movie. One of ['science fiction', 'comedy', 'drama', 'thriller', 'romance', 'action', 'animated']",
+        type="string",
+    ),
+    AttributeInfo(
+        name="year",
+        description="The year the movie was released",
+        type="integer",
+    ),
+    AttributeInfo(
+        name="director",
+        description="The name of the movie director",
+        type="string",
+    ),
+    AttributeInfo(
+        name="rating", description="A 1-10 rating for the movie", type="float"
+    ),
 ]
 
 # Description of contents
@@ -142,7 +152,7 @@ for i, sq in enumerate(structured_queries, 1):
 
 # Query and results
 for i, query in enumerate(queries, 1):
-    print(f"\nResults {i}:")
+    print(f"\nResults {i} - Query {query}:")
     results = retriever.invoke(query)
     for r in results:
         print(r.page_content, "=>", r.metadata)
