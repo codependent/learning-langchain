@@ -1,4 +1,5 @@
 from langchain_community.document_loaders import TextLoader
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_postgres.vectorstores import PGVector
@@ -17,7 +18,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 documents = text_splitter.split_documents(raw_documents)
 
 # Create embeddings for the documents
-embeddings_model = OpenAIEmbeddings()
+#embeddings_model = OpenAIEmbeddings()
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = PGVector.from_documents(
     documents, embeddings_model, connection=connection)
@@ -28,11 +30,12 @@ retriever = db.as_retriever(search_kwargs={"k": 5})
 # instruction to generate multiple queries
 perspectives_prompt = ChatPromptTemplate.from_template(
     """You are an AI language model assistant. Your task is to generate five different versions of the given user question to retrieve relevant documents from a vector database. 
-    By generating multiple perspectives on the user question, your goal is to help the user overcome some of the limitations of the distance-based  similarity search. 
-    Provide these alternative questions separated by newlines. 
+    By generating multiple perspectives on the user question, your goal is to help the user overcome some of the limitations of the distance-based similarity search. 
+    Provide these alternative questions separated by newlines, don't use any introductory nor conclusive text. Also don't include any kind of numbering or bullet points.
     Original question: {question}""")
 
-llm = ChatOpenAI(model="gpt-3.5-turbo")
+#llm = ChatOpenAI(model="gpt-3.5-turbo")
+llm = ChatOllama(model="gemma3:4b", temperature=0)
 
 
 def parse_queries_output(message):
@@ -62,9 +65,10 @@ query = "Who are the key figures in the ancient greek history of philosophy?"
 @chain
 def multi_query_qa(input):
     # fetch relevant documents
-    docs = retrieval_chain.invoke(input)  # format prompt
+    union_docs = retrieval_chain.invoke(input)  # format prompt
+    context = "\n\n".join(doc.page_content for doc in union_docs)
     formatted = prompt.invoke(
-        {"context": docs, "question": input})  # generate answer
+        {"context": context, "question": input})  # generate answer
     answer = llm.invoke(formatted)
     return answer
 

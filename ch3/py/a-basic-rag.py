@@ -75,7 +75,8 @@ def qa(qa_text):
     # fetch relevant documents
     retrieved_docs = retriever.invoke(qa_text)
     # format prompt
-    formatted = prompt.invoke({"context": retrieved_docs, "question": qa_text})
+    context = "\n\n".join(doc.page_content for doc in retrieved_docs)
+    formatted = prompt.invoke({"context": context, "question": qa_text})
     # generate answer
     answer = llm.invoke(formatted)
     return answer
