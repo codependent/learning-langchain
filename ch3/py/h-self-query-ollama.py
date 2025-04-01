@@ -3,12 +3,9 @@ from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain_postgres.vectorstores import PGVector
 from langchain_core.documents import Document
-from langchain.prompts import PromptTemplate
 
 # PGVector DB connection
 connection = "postgresql+psycopg://langchain:langchain@localhost:6024/langchain"
-
-
 
 # Sample documents
 docs = [
@@ -76,62 +73,13 @@ document_content_description = "Brief summary of a movie"
 # Define Ollama LLM for querying metadata
 llm = ChatOllama(model="gemma3:4b", temperature=0)
 
-prompt_template_str = """
-You are a text-to-structured-query converter. Convert natural language questions into structured queries.
-
-Use the provided metadata schema and examples to guide your conversion.
-
-Respond ONLY with a valid JSON object. Do not include any explanations.
-
-Schema:
-{schema}
-
-Examples:
-{examples}
-
-User Query:
-{query}
-
-Structured Query:
-"""
-
-custom_prompt = PromptTemplate(
-    template=prompt_template_str
-    .replace("Respond with a JSON object", "Only respond with a valid JSON object. Do NOT include explanations. Be careful to match all query conditions"),
-    input_variables=["query", "schema", "examples"]
-)
-
-
 # Create the retriever
 retriever = SelfQueryRetriever.from_llm(
     llm=llm,
     vectorstore=vectorstore,
     document_contents=document_content_description,
     metadata_field_info=metadata_field_info,
-    #prompt=custom_prompt,
     enable_limit=False,
-    examples = [
-        {
-            "query": "I want to watch science fiction movies with a rating at least 5.5",
-            "filter": 'and(gt("rating", 5.5), eq("genre", "science fiction"))'
-        },
-        {
-            "query": "Find movies of science fiction genre with a rating greater than 8.5",
-            "filter": 'and(gt("rating", 8.5), eq("genre", "science fiction"))'
-        },
-        {
-            "query": "Find comedy movies",
-            "filter": 'eq("genre", "comedy")'
-        },
-        {
-            "query": "Show animated movies with a rating above 7",
-            "filter": 'and(gt("rating", 7), eq("genre", "animated"))'
-        },
-        {
-            "query": "Find science fiction movies with a rating greater than 8.5",
-            "filter": 'and(gt("rating", 8.5), eq("genre", "science fiction"))'
-        }
-    ],
     search_kwargs={"k":4}
 )
 
