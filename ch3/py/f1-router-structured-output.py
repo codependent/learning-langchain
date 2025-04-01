@@ -47,6 +47,7 @@ prompt.invoke("french") """
 
 result = router.invoke({"question": question})
 print("\nRouting to: ", result)
+print("\nDatasource: ", result.model_dump_json())
 
 """
 Once we extracted the relevant data source, we can pass the value into another function to execute additional logic as required:
