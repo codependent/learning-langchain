@@ -1,10 +1,13 @@
 
 from typing import Literal
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableLambda
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 
 # Data model class
 class RouteQuery(BaseModel):
@@ -17,7 +20,8 @@ class RouteQuery(BaseModel):
 
 # Prompt template
 # LLM with function call
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+#llm = ChatOpenAI(model="gpt-4o", temperature=0)
+llm = ChatOllama(model="llama3.1", temperature=0)
 
 """
 with_structured_output: Model wrapper that returns outputs formatted to match the given schema.

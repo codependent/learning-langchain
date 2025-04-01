@@ -13,9 +13,10 @@ class AnswerWithJustification(BaseModel):
 
 
 #llm = ChatOpenAI(model="gpt-3.5", temperature=0)
-llm = ChatOllama(model="gemma3:4b", temperature=0)
+llm = ChatOllama(model="llama3.1", temperature=0)
 structured_llm = llm.with_structured_output(AnswerWithJustification)
 
 response = structured_llm.invoke(
     "What weighs more, a pound of bricks or a pound of feathers")
 print(response)
+print(print(response.model_dump_json()))
