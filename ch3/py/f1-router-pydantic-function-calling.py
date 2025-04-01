@@ -26,7 +26,7 @@ llm = ChatOllama(model="llama3.1", temperature=0).bind(tools=tools)
 # Clear system prompt instructing use of the routing tool
 system = """
 You are a routing assistant. 
-You must always use the tool `mytool` to select the best documentation source.
+You must always use the tool `RouteToDatasource` to select the best documentation source.
 Given a programming-related question, respond by calling the tool and specifying either 'python_docs' or 'js_docs' as the most relevant source.
 Do not explain your choice — just call the tool with the right parameter.
 """

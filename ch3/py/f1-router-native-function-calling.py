@@ -7,9 +7,11 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 def route_tool_fn(question: str) -> str:
+    """This tool routes a user question to the most relevant datasource."""
     return "python_docs" if "python" in question.lower() else "js_docs"
 
 def calculator_tool_fn(question: str) -> str:
+    """This tool calculates a number associated to the question"""
     return question + " is 42"
 
 route_tool_fn_openai = convert_to_openai_function(route_tool_fn)
