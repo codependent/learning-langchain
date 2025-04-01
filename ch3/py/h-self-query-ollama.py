@@ -18,7 +18,7 @@ connection = "postgresql+psycopg://langchain:langchain@localhost:6024/langchain"
 docs = [
     Document(
         page_content="A bunch of scientists bring back dinosaurs and mayhem breaks loose",
-        metadata={"year": 1993, "rating": 7.7, "genre": "science fiction"},
+        metadata={"year": 1993, "rating": 8.7, "genre": "science fiction"},
     ),
     Document(
         page_content="Leo DiCaprio gets lost in a dream within a dream within a dream within a ...",
@@ -38,16 +38,11 @@ docs = [
     ),
     Document(
         page_content="Toys come alive and have a blast doing so",
-        metadata={"year": 1995, "genre": "animated"},
+        metadata={"year": 1995, "genre": "animated", "rating": 7.5},
     ),
     Document(
         page_content="Three men walk into the Zone, three men walk out of the Zone",
-        metadata={
-            "year": 1979,
-            "director": "Andrei Tarkovsky",
-            "genre": "thriller",
-            "rating": 9.9,
-        },
+        metadata={"year": 1979, "director": "Andrei Tarkovsky", "genre": "thriller","rating": 9.9},
     ),
 ]
 
@@ -69,10 +64,29 @@ metadata_field_info = [
 document_content_description = "Brief summary of a movie"
 
 # Define Ollama LLM for querying metadata
-llm = ChatOllama(model="llama3", temperature=0)
+llm = ChatOllama(model="mistral", temperature=0)
+
+prompt_template_str = """
+You are a text-to-structured-query converter. Convert natural language questions into structured queries.
+
+Use the provided metadata schema and examples to guide your conversion.
+
+Respond ONLY with a valid JSON object. Do not include any explanations.
+
+Schema:
+{schema}
+
+Examples:
+{examples}
+
+User Query:
+{query}
+
+Structured Query:
+"""
 
 custom_prompt = PromptTemplate(
-    template=DEFAULT_TEMPLATE
+    template=prompt_template_str
     .replace("Respond with a JSON object", "Only respond with a valid JSON object. Do NOT include explanations. Be careful to match all query conditions"),
     input_variables=["query", "schema", "examples"]
 )
@@ -84,36 +98,51 @@ retriever = SelfQueryRetriever.from_llm(
     vectorstore=vectorstore,
     document_contents=document_content_description,
     metadata_field_info=metadata_field_info,
-    prompt=custom_prompt,
-    enable_limit=True,
+    #prompt=custom_prompt,
+    enable_limit=False,
+    examples = [
+        {
+            "query": "I want to watch science fiction movies with a rating at least 5.5",
+            "filter": 'and(gt("rating", 5.5), eq("genre", "science fiction"))'
+        },
+        {
+            "query": "Find movies of science fiction genre with a rating greater than 8.5",
+            "filter": 'and(gt("rating", 8.5), eq("genre", "science fiction"))'
+        },
+        {
+            "query": "Find comedy movies",
+            "filter": 'eq("genre", "comedy")'
+        },
+        {
+            "query": "Show animated movies with a rating above 7",
+            "filter": 'and(gt("rating", 7), eq("genre", "animated"))'
+        },
+        {
+            "query": "Find science fiction movies with a rating greater than 8.5",
+            "filter": 'and(gt("rating", 8.5), eq("genre", "science fiction"))'
+        }
+    ],
+    search_kwargs={"k":4}
 )
 
-query1 = "I want to watch a movie rated higher than 8.5"
-query2 = "Find movies of science fiction genre with a rating greater than 8.5"
-query3 = "I'd like to watch a comedy"
+queries = [
+    "I want to watch a movie rated higher than 8.5",
+    "Find movies of science fiction genre with a rating greater than 8.5",
+    "I'd like to watch a comedy",
+    "Find science fiction movies with a rating greater than 8.5",
+    "Show me movies of the animated genre above 7 rating",
+    "I'd like to find movies released in 1980 or before"
+]
 
-print("🔍 DEBUGGING: Inspecting structured query...")
-structured_query1 = retriever.query_constructor.invoke(query1)
-structured_query2 = retriever.query_constructor.invoke(query2)
-structured_query3 = retriever.query_constructor.invoke(query3)
+# Structured query inspection
 print("Structured Queries:")
-print(structured_query1)
-print(structured_query2)
-print(structured_query3)
+structured_queries = [retriever.query_constructor.invoke(q) for q in queries]
+for i, sq in enumerate(structured_queries, 1):
+    print(f"Query {i}: {sq}")
 
-# Query examples
-results_1 = retriever.invoke(query1)
-results_2 = retriever.invoke(query2)
-results_3 = retriever.invoke(query3)
-
-print("Results 1:")
-for r in results_1:
-    print(r.page_content, "=>", r.metadata)
-
-print("\nResults 2:")
-for r in results_2:
-    print(r.page_content, "=>", r.metadata)
-
-print("\nResults 3:")
-for r in results_3:
-    print(r.page_content, "=>", r.metadata)
+# Query and results
+for i, query in enumerate(queries, 1):
+    print(f"\nResults {i}:")
+    results = retriever.invoke(query)
+    for r in results:
+        print(r.page_content, "=>", r.metadata)
