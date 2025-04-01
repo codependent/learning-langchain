@@ -64,7 +64,7 @@ metadata_field_info = [
 document_content_description = "Brief summary of a movie"
 
 # Define Ollama LLM for querying metadata
-llm = ChatOllama(model="mistral", temperature=0)
+llm = ChatOllama(model="gemma3:4b", temperature=0)
 
 prompt_template_str = """
 You are a text-to-structured-query converter. Convert natural language questions into structured queries.
@@ -130,7 +130,7 @@ queries = [
     "Find movies of science fiction genre with a rating greater than 8.5",
     "I'd like to watch a comedy",
     "Find science fiction movies with a rating greater than 8.5",
-    "Show me movies of the animated genre above 7 rating",
+    "Show me animated movies above 7 rating",
     "I'd like to find movies released in 1980 or before"
 ]
 
