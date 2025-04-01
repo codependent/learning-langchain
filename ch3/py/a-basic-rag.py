@@ -2,7 +2,7 @@
 1. Ensure docker is installed and running (https://docs.docker.com/get-docker/)
 2. pip install -qU langchain_postgres
 3. Run the following command to start the postgres container:
-   
+
 docker run \
     --name pgvector-container \
     -e POSTGRES_USER=langchain \
@@ -21,7 +21,7 @@ from langchain_postgres.vectorstores import PGVector
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import chain
-
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 
 # See docker command above to launch a postgres instance with pgvector enabled.
 connection = "postgresql+psycopg://langchain:langchain@localhost:6024/langchain"
@@ -33,7 +33,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 documents = text_splitter.split_documents(raw_documents)
 
 # Create embeddings for the documents
-embeddings_model = OpenAIEmbeddings()
+#embeddings_model = OpenAIEmbeddings()
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = PGVector.from_documents(
     documents, embeddings_model, connection=connection)
@@ -51,7 +52,8 @@ print(docs[0].page_content)
 prompt = ChatPromptTemplate.from_template(
     """Answer the question based only on the following context: {context} Question: {question} """
 )
-llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
+#llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
+llm = ChatOllama(model="gemma3:4b", temperature=0)
 llm_chain = prompt | llm
 
 # answer the question based on relevant documents
@@ -69,11 +71,11 @@ print("Running again but this time encapsulate the logic for efficiency\n")
 
 
 @chain
-def qa(input):
+def qa(qa_text):
     # fetch relevant documents
-    docs = retriever.invoke(input)
+    retrieved_docs = retriever.invoke(qa_text)
     # format prompt
-    formatted = prompt.invoke({"context": docs, "question": input})
+    formatted = prompt.invoke({"context": retrieved_docs, "question": qa_text})
     # generate answer
     answer = llm.invoke(formatted)
     return answer

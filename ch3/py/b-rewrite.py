@@ -2,7 +2,7 @@
 1. Ensure docker is installed and running (https://docs.docker.com/get-docker/)
 2. pip install -qU langchain_postgres
 3. Run the following command to start the postgres container:
-   
+
 docker run \
     --name pgvector-container \
     -e POSTGRES_USER=langchain \
@@ -15,6 +15,7 @@ docker run \
 """
 
 from langchain_community.document_loaders import TextLoader
+from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_postgres.vectorstores import PGVector
@@ -33,7 +34,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 documents = text_splitter.split_documents(raw_documents)
 
 # Create embeddings for the documents
-embeddings_model = OpenAIEmbeddings()
+#embeddings_model = OpenAIEmbeddings()
+embeddings_model = OllamaEmbeddings(model="nomic-embed-text")
 
 db = PGVector.from_documents(
     documents, embeddings_model, connection=connection)
@@ -53,7 +55,8 @@ print("\n\n")
 prompt = ChatPromptTemplate.from_template(
     """Answer the question based only on the following context: {context} Question: {question} """
 )
-llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
+#llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
+llm = ChatOllama(model="gemma3:4b", temperature=0)
 
 
 # Run again but this time encapsulate the logic for efficiency
@@ -79,7 +82,7 @@ print(result.content)
 print("\nRewrite the query to improve accuracy\n")
 
 rewrite_prompt = ChatPromptTemplate.from_template(
-    """Provide a better search query for web search engine to answer the given question, end the queries with ’**’. Question: {x} Answer:""")
+    """Provide a better search query for web search engine to answer the given question. Provide just one alternative query, end the query with ’**’. Question: {x} Answer:""")
 
 
 def parse_rewriter_output(message):
