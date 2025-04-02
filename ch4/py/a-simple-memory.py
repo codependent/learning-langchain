@@ -1,4 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 
 prompt = ChatPromptTemplate.from_messages([
@@ -6,7 +7,8 @@ prompt = ChatPromptTemplate.from_messages([
     ("placeholder", "{messages}"),
 ])
 
-model = ChatOpenAI()
+#model = ChatOpenAI()
+model = ChatOllama(model="llama3.1")
 
 chain = prompt | model
 
