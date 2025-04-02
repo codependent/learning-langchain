@@ -9,7 +9,6 @@ from langgraph.checkpoint.memory import MemorySaver
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
-
 builder = StateGraph(State)
 
 #model = ChatOpenAI()
@@ -32,10 +31,10 @@ thread1 = {"configurable": {"thread_id": "1"}}
 
 # Run with persistence
 result_1 = graph.invoke({"messages": [HumanMessage("hi, my name is Jack!")]}, thread1)
-print(result_1)
+print("Result 1", result_1)
 
 result_2 = graph.invoke({"messages": [HumanMessage("what is my name?")]}, thread1)
-print(result_2)
+print("Result 2", result_2)
 
 # Get state
 print(graph.get_state(thread1))
