@@ -3,15 +3,19 @@ from typing import Annotated, Literal, TypedDict
 from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.vectorstores.in_memory import InMemoryVectorStore
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 
-embeddings = OpenAIEmbeddings()
+#embeddings = OpenAIEmbeddings()
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
 # useful to generate SQL query
-model_low_temp = ChatOpenAI(temperature=0.1)
+#model_low_temp = ChatOpenAI(temperature=0.1)
+model_low_temp = ChatOllama(model="llama3.1", temperature=0.1)
 # useful to generate natural language outputs
-model_high_temp = ChatOpenAI(temperature=0.7)
+#model_high_temp = ChatOpenAI(temperature=0.7)
+model_high_temp = ChatOllama(model="llama3.1", temperature=0.1)
 
 
 class State(TypedDict):
@@ -38,7 +42,7 @@ class Output(TypedDict):
 sample_docs = [
     Document(page_content="Patient medical record...", metadata={"domain": "records"}),
     Document(
-        page_content="Insurance policy details...", metadata={"domain": "insurance"}
+        page_content="Insurance policy details. COVID 19 treatment is not covered.", metadata={"domain": "insurance"}
     ),
 ]
 
@@ -97,7 +101,7 @@ medical_records_prompt = SystemMessage(
 )
 
 insurance_faqs_prompt = SystemMessage(
-    "You are a helpful medical insurance chatbot, who answers frequently asked questions about insurance policies, claims, and coverage."
+    "You are a helpful medical insurance chatbot, who answers frequently asked questions about insurance policies, claims, and coverage. You must based your answers on the contents of the provided documents. If they don't contain the necessary information you should say so."
 )
 
 
@@ -135,4 +139,8 @@ graph = builder.compile()
 # Example usage
 input = {"user_query": "Am I covered for COVID-19 treatment?"}
 for chunk in graph.stream(input):
+    print(chunk)
+
+input2 = {"user_query": "Am I covered for ankle injuries?"}
+for chunk in graph.stream(input2):
     print(chunk)

@@ -1,14 +1,17 @@
 from typing import Annotated, TypedDict
 
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 
 # useful to generate SQL query
-model_low_temp = ChatOpenAI(temperature=0.1)
+#model_low_temp = ChatOpenAI(temperature=0.1)
+model_low_temp = ChatOllama(model="llama3.1", temperature=0.1)
 # useful to generate natural language outputs
-model_high_temp = ChatOpenAI(temperature=0.7)
+#model_high_temp = ChatOpenAI(temperature=0.7)
+model_high_temp = ChatOllama(model="llama3.1", temperature=0.7)
 
 
 class State(TypedDict):

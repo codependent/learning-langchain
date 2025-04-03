@@ -1,12 +1,13 @@
 from typing import Annotated, TypedDict
 
+from langchain_ollama import ChatOllama
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 
-model = ChatOpenAI()
-
+#model = ChatOpenAI()
+model = ChatOllama(model="llama3.1")
 
 class State(TypedDict):
     # Messages have the type "list". The `add_messages`
@@ -15,11 +16,9 @@ class State(TypedDict):
     # list, rather than replacing the previous messages)
     messages: Annotated[list, add_messages]
 
-
 def chatbot(state: State):
     answer = model.invoke(state["messages"])
     return {"messages": [answer]}
-
 
 builder = StateGraph(State)
 
@@ -35,3 +34,5 @@ graph = builder.compile()
 input = {"messages": [HumanMessage("hi!")]}
 for chunk in graph.stream(input):
     print(chunk)
+
+graph.get_graph().draw_mermaid_png()
