@@ -9,18 +9,19 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
+from simpleeval import simple_eval
 
 
 @tool
 def calculator(query: str) -> str:
     """A simple calculator tool. Input should be a mathematical expression."""
-    return ast.literal_eval(query)
+    return simple_eval(query)
 
 
 search = DuckDuckGoSearchRun()
 tools = [search, calculator]
 #model = ChatOpenAI(temperature=0.1).bind_tools(tools)
-model = ChatOllama(model="llama3.1").bind_tools(tools)
+model = ChatOllama(model="llama3.1", temperature=0.1).bind_tools(tools)
 
 
 class State(TypedDict):
@@ -52,4 +53,15 @@ input = {
 }
 
 for c in graph.stream(input):
+    print(c)
+
+input2 = {
+    "messages": [
+        HumanMessage(
+            "Calculate: 5243 * 2434"
+        )
+    ]
+}
+
+for c in graph.stream(input2):
     print(c)
